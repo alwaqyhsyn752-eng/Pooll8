@@ -1,0 +1,31 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Download OpenCV Android SDK
+        run: |
+          wget -q https://github.com/opencv/opencv/releases/download/4.9.0/opencv-4.9.0-android-sdk.zip
+          unzip -q opencv-4.9.0-android-sdk.zip
+          mkdir -p app/src/main/cpp/opencv
+          mv OpenCV-android-sdk/sdk app/src/main/cpp/opencv/
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/*.apk
