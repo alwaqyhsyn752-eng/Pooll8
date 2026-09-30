@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Pooll8</string>
+    <string name="start_overlay">Start Overlay</string>
+    <string name="stop_overlay">Stop Overlay</string>
+    <string name="status_running">Overlay Running</string>
+    <string name="status_stopped">Not Running</string>
+    <string name="status_denied">Permission denied</string>
+</resources>

@@ -1,0 +1,4 @@
+-keep class com.example.aimassist.cv.NativeBridge { *; }
+-keepclasseswithmembernames class * { native <methods>; }
+-keep class org.opencv.** { *; }
+-dontwarn org.opencv.**

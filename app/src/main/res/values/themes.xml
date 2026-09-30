@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.AimAssist" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
+    </style>
+</resources>
