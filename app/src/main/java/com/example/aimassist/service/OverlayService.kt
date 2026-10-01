@@ -14,10 +14,14 @@ import com.example.aimassist.domain.model.BallColor
 import com.example.aimassist.overlay.OverlayWindowManager
 import com.example.aimassist.physics.TrajectoryCalculator
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.conflateimport javax.inject.Inject
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class OverlayService : LifecycleService() {
@@ -39,7 +43,9 @@ class OverlayService : LifecycleService() {
     @Inject lateinit var notifHelper: NotificationHelper
 
     private val frameChannel = MutableSharedFlow<Bitmap>(
-        replay = 0, extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
     private var processingJob: Job? = null
@@ -53,7 +59,9 @@ class OverlayService : LifecycleService() {
             val code = it.getIntExtra(EXTRA_RESULT_CODE, -1)
             val data = it.getParcelableExtra<Intent>(EXTRA_DATA)
             if (code == -1 || data == null) {
-                Log.e(TAG, "Missing projection"); stopSelf(); return START_NOT_STICKY
+                Log.e(TAG, "Missing projection")
+                stopSelf()
+                return START_NOT_STICKY
             }
             startPipeline(code, data)
         }
@@ -77,7 +85,9 @@ class OverlayService : LifecycleService() {
                     val cue = detection.balls.firstOrNull { it.color == BallColor.CUE } ?: return@runCatching
                     val target = pickTarget(detection.balls, cue) ?: return@runCatching
                     val traj = physics.compute(cue, target, table)
-                    withContext(Dispatchers.Main) { overlayManager.attach().trajectory = traj }
+                    withContext(Dispatchers.Main) {
+                        overlayManager.attach().trajectory = traj
+                    }
                 }.onFailure { Log.w(TAG, "Frame failed", it) }
             }
         }
@@ -94,5 +104,8 @@ class OverlayService : LifecycleService() {
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent): IBinder? { super.onBind(intent); return null }
+    override fun onBind(intent: Intent): IBinder? {
+        super.onBind(intent)
+        return null
+    }
 }
