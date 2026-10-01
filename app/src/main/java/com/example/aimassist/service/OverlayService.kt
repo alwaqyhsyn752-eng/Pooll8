@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -76,7 +75,7 @@ class OverlayService : LifecycleService() {
 
         processingJob = lifecycleScope.launch(Dispatchers.Default) {
             var counter = 0
-            frameChannel.conflate().collect { bitmap ->
+            frameChannel.collect { bitmap ->
                 counter++
                 if (counter % FRAME_SKIP != 0) return@collect
                 runCatching {
