@@ -1,19 +1,7 @@
 [versions]
-agp = "8.5.0"
-kotlin = "2.0.0"
-hilt = "2.51.1"
-coroutines = "1.8.1"
-lifecycle = "2.8.3"
-
-[libraries]
-androidx-core = { module = "androidx.core:core-ktx", version = "1.13.1" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
-androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
-androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
-androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+agp = "8.2.2"
+kotlin = "1.9.22"
+hilt = "2.50"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
