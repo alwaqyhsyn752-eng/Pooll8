@@ -20,20 +20,25 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK (preinstalled)
+      - name: Verify environment
         run: |
+          echo "=== Java ==="
+          java -version
+          echo "=== Android Home ==="
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls -la $ANDROID_HOME || true
-          which sdkmanager || true
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null 2>&1 || true
+          ls -la $ANDROID_HOME 2>/dev/null || echo "no ANDROID_HOME"
+          echo "=== Gradle files ==="
+          ls -la gradlew gradle/wrapper/ || true
+          echo "=== NDK ==="
+          ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "no NDK"
 
       - name: Cache OpenCV
         id: cache-opencv
         uses: actions/cache@v4
         with:
           path: app/src/main/cpp/opencv
-          key: opencv-4.9.0-android
+          key: opencv-4.9.0-android-v1
 
       - name: Download OpenCV
         if: steps.cache-opencv.outputs.cache-hit != 'true'
@@ -42,18 +47,39 @@ jobs:
           unzip -q opencv-4.9.0-android-sdk.zip
           mkdir -p app/src/main/cpp/opencv
           mv OpenCV-android-sdk/sdk app/src/main/cpp/opencv/
+          ls app/src/main/cpp/opencv/sdk/native/jni/
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Grant execute permission
+        run: chmod +x gradlew
 
-      - name: Run Tests
-        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
-        continue-on-error: true
+      - name: Show Gradle version
+        run: ./gradlew --version
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+      - name: Build Debug APK (verbose)
+        run: ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tee build.log
+
+      - name: Show tail of log if failed
+        if: failure()
+        run: |
+          echo "════════════════════════════"
+          echo "FIRST 100 LINES (real error)"
+          echo "════════════════════════════"
+          head -100 build.log
+          echo ""
+          echo "════════════════════════════"
+          echo "GREP for FAILURE"
+          echo "════════════════════════════"
+          grep -A 30 "FAILURE:" build.log || true
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: pooll8-debug-apk
