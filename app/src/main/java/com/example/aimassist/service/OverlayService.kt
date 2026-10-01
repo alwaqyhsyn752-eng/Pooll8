@@ -17,7 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import javax.inject.Inject
+import kotlinx.coroutines.flow.conflateimport javax.inject.Inject
 
 @AndroidEntryPoint
 class OverlayService : LifecycleService() {
