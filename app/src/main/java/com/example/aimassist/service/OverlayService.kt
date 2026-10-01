@@ -51,18 +51,30 @@ class OverlayService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        notifHelper.ensureChannel()
-        startForeground(NotificationHelper.NOTIF_ID, notifHelper.buildNotification())
+        try {
+            notifHelper.ensureChannel()
+            startForeground(NotificationHelper.NOTIF_ID, notifHelper.buildNotification())
+        } catch (t: Throwable) {
+            Log.e(TAG, "startForeground failed", t)
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         intent?.let {
             val code = it.getIntExtra(EXTRA_RESULT_CODE, -1)
+            @Suppress("DEPRECATION")
             val data = it.getParcelableExtra<Intent>(EXTRA_DATA)
             if (code == -1 || data == null) {
-                Log.e(TAG, "Missing projection")
+                Log.e(TAG, "Missing projection data")
                 stopSelf()
                 return START_NOT_STICKY
             }
-            startPipeline(code, data)
+            try {
+                startPipeline(code, data)
+            } catch (t: Throwable) {
+                Log.e(TAG, "Pipeline failed", t)
+                stopSelf()
+            }
         }
         return START_STICKY
     }
@@ -96,10 +108,10 @@ class OverlayService : LifecycleService() {
         balls.filter { it.id != cue.id }.minByOrNull { it.center.distanceTo(cue.center) }
 
     override fun onDestroy() {
-        processingJob?.cancel()
-        capture.stop()
-        overlayManager.detach()
-        detector.release()
+        try { processingJob?.cancel() } catch (_: Throwable) {}
+        try { capture.stop() } catch (_: Throwable) {}
+        try { overlayManager.detach() } catch (_: Throwable) {}
+        try { detector.release() } catch (_: Throwable) {}
         super.onDestroy()
     }
 
